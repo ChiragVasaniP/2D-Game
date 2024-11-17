@@ -17,4 +17,5 @@ data class GameConfig(
     var playerCollisionBoxPadding: PaddingValue = PaddingValue(),
     var coinSize: Pair<Float, Float> = Pair(0.7f, 0.7f),
     var ObstaclesSize: Pair<Float, Float> = Pair(0.7f, 0.7f),
+    var NO_OF_COLUMN:Int = 4
 )

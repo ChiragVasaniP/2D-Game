@@ -22,6 +22,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.scale
 import com.example.fallingobjectgame.R
+import com.example.fallingobjectgame.gameView.gameUtils.BackgroundMusicManager
 import com.example.fallingobjectgame.gameView.gameUtils.GameSoundEffectPlayer
 import com.example.fallingobjectgame.gameView.gameobjects.Coin
 import com.example.fallingobjectgame.gameView.gameobjects.Effect
@@ -45,6 +46,11 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
         Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER) }
     }
     protected val gameSoundPlayer by lazy { GameSoundEffectPlayer(context) }
+
+
+     val backgroundMusic by lazy {
+          BackgroundMusicManager(context,R.raw.background_music)
+     }
 
     protected val explosion = Effect(context, 4, 4, 1.20f, R.drawable.ic_explosion_spiritsheet)
     protected val coinCollect = Effect(context, 4, 4, 0.40f, R.drawable.ic_coin_spirit)
@@ -103,10 +109,11 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
         with(gameState) {
             gameViewWidth = w
             gameViewHeight = h
-            playerWidth = w / 4
+            playerWidth = w /gameState.config. NO_OF_COLUMN
             playerHeight = playerWidth + 10
-            columnWidth = w / 4
+            columnWidth = w / gameState.config. NO_OF_COLUMN
         }
+        backgroundMusic.onCreate()
         explosion.loadSprites()
         coinCollect.loadSprites()
         player.loadSprites()
@@ -173,7 +180,7 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
     }
 
     protected fun drawPlayer(canvas: Canvas) {
-
+        backgroundMusic.onResume()
         val playerWidth = (gameState.playerWidth)
         val aspectRatio = (characterObjectAsset?.intrinsicHeight
             ?: 1).toFloat() / (characterObjectAsset?.intrinsicWidth ?: 1)
@@ -248,8 +255,8 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
 
         canvasPaint.shader = gradient
 
-        val laneWidth = gameState.gameViewWidth / 4
-        for (i in 1 until 4) { // Draw separators between 4 lanes
+        val laneWidth = gameState.gameViewWidth / gameState.config. NO_OF_COLUMN
+        for (i in 1 until gameState.config. NO_OF_COLUMN) { // Draw separators between 4 lanes
             val x = (i * laneWidth).toFloat() // Centered between lanes
             canvas.drawLine(
                 x,
@@ -285,7 +292,7 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
     }
 
     fun moveCharacterToRight() {
-        if (gameState.playerColumnPosition < 3) { // Changed to accommodate 4 lanes
+        if (gameState.playerColumnPosition < gameState.config. NO_OF_COLUMN-1) { // Changed to accommodate 4 lanes
             if (gameState.config.enableSmoothMovement) {
                 val targetLane = gameState.playerColumnPosition + 1
                 movementQueue.add(targetLane)
@@ -352,6 +359,8 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
         if (gameState.currentGameStatus != GameStatus.RUNNING) {
             gameState.currentGameStatus = GameStatus.RUNNING
             gameThread()
+
+            backgroundMusic.onResume()
             listener?.onGameStateChange(gameState.currentGameStatus, gameState.totalScore, false)
         }
 
@@ -360,12 +369,14 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
     fun pauseGame() {
         gameState.currentGameStatus = GameStatus.PAUSE
         gameThreadJob?.cancel()
+        backgroundMusic.onPause()
     }
 
     fun resumeGame() {
         if (gameState.currentGameStatus != GameStatus.RUNNING) {
             gameState.currentGameStatus = GameStatus.RUNNING
             gameThread()
+            backgroundMusic.onResume()
         }
     }
 
@@ -373,6 +384,8 @@ abstract class AbstractGameView(context: Context, attrs: AttributeSet?) : View(c
         // this.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         gameThreadJob?.cancel()
         gameState.currentGameStatus = GameStatus.ENDED
+
+        backgroundMusic.onDestroy()
         listener?.onGameStateChange(gameState.currentGameStatus, gameState.totalScore, hasUserQuit)
         clearGameView()
     }

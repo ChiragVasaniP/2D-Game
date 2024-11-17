@@ -118,11 +118,11 @@ class GameView(context: Context, attrs: AttributeSet?) : AbstractGameView(contex
 
         val noOfObstaclesGenerator = when (getCurrentGameLevel()) {
             in 0..2 -> {
-                (1..3).random()
+                (1..<gameState.config.NO_OF_COLUMN).random()
             }
 
             in (3..4) -> {
-                (2..3).random()
+                (2..<gameState.config.NO_OF_COLUMN).random()
             }
 
             else -> {
@@ -130,7 +130,12 @@ class GameView(context: Context, attrs: AttributeSet?) : AbstractGameView(contex
             }
         }
         val iterator = (1..noOfObstaclesGenerator).iterator()
-        val laneList = mutableListOf(0, 1, 2, 3)
+        val laneList = mutableListOf<Int>().apply {
+            for (i in 0 until gameState.config.NO_OF_COLUMN) {
+                add(i)
+            }
+        }
+
         Log.e("Iterator", "Range ${noOfObstaclesGenerator}")
         obstacleIterator(iterator, laneList, callback)
     }

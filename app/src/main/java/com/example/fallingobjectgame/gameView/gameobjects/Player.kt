@@ -61,7 +61,7 @@ data class Player(
 
     var isEffectVisible = false
     private var currentFrameIndex = 0 // Index of the current explosion frame
-    private var frameDuration = 2 // Number of draws per frame (adjust for speed)
+    private var frameDuration = 8// Number of draws per frame (adjust for speed)
     private var frameDurationCounter = frameDuration // Counter for frame timing
     private var yOffset: Float? = null // Current vertical position of the effect
     private val speed = 10f // Speed of upward movement
